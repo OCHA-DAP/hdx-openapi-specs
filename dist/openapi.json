@@ -1,0 +1,1418 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "HDX CKAN DataStore API",
+    "version": "2.11.4",
+    "description": "OpenAPI specification for the CKAN DataStore API as exposed by the Humanitarian Data Exchange (HDX). Covers the Tabular Data Endpoints (TDE): `datastore_search`, `datastore_search_sql`, and `datastore_info`.\n\nCKAN actions accept parameters as either query string parameters (GET) or a JSON body (POST). Both methods are equivalent. All requests must include the `Authorization` header when accessing private resources.\n\n> **Note:** This specification documents behavior as described in the [CKAN 2.11.4 documentation](https://docs.ckan.org/en/latest/maintaining/datastore.html). Some parameter interactions (e.g. `filters` vs `q` in `datastore_search`) have nuanced behavior that is not fully captured here.",
+    "contact": {
+      "name": "HDX Team",
+      "url": "https://data.humdata.org"
+    },
+    "license": {
+      "name": "Creative Commons Attribution International",
+      "url": "https://creativecommons.org/licenses/by/4.0/"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://data.humdata.org/api/3/action",
+      "description": "HDX Production"
+    }
+  ],
+  "paths": {
+    "/datastore_search": {
+      "get": {
+        "operationId": "datastore_search_get",
+        "summary": "Search a DataStore resource",
+        "description": "Query rows from a DataStore resource with optional filtering, full-text search, sorting, and pagination.\n\nPass parameters as query string arguments (GET) or as a JSON body (POST).",
+        "tags": [
+          "DataStore"
+        ],
+        "parameters": [
+          {
+            "name": "resource_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "title": "Resource Id",
+              "type": "string"
+            },
+            "description": "The `id` or alias of the resource to search. Required."
+          },
+          {
+            "name": "filters",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "object"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Filters"
+            },
+            "description": "Matching conditions as a dictionary of `{field: value}` pairs. Rows must match all conditions. Example: `{\"country\": \"Uganda\"}`."
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "object"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Q"
+            },
+            "description": "Full-text search query. Pass a string to search across all fields, or a dictionary of `{field: query}` to target specific fields. Note: behavior differs subtly from `filters` \u2014 `q` uses full-text ranking while `filters` performs exact matching."
+          },
+          {
+            "name": "full_text",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Full Text"
+            },
+            "description": "Full-text search query applied across all fields. Similar to `q` with a string value, but always searches all fields. Cannot be combined with `q`."
+          },
+          {
+            "name": "distinct",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": false,
+              "title": "Distinct"
+            },
+            "description": "Return only unique rows. Defaults to `false`."
+          },
+          {
+            "name": "plain",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": true,
+              "title": "Plain"
+            },
+            "description": "Treat the `q` query as plain text (no special FTS operators). Set to `false` to use PostgreSQL tsquery syntax. Defaults to `true`."
+          },
+          {
+            "name": "language",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": "english",
+              "title": "Language"
+            },
+            "description": "Language used for full-text search stemming. Defaults to `english`."
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": 100,
+              "title": "Limit"
+            },
+            "description": "Maximum number of rows to return. Defaults to `100`."
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Offset"
+            },
+            "description": "Number of rows to skip before returning results. Used for pagination."
+          },
+          {
+            "name": "fields",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Fields"
+            },
+            "description": "Columns to include in the response. Pass a comma-separated string or a list. Defaults to all fields."
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Sort"
+            },
+            "description": "Comma-separated list of fields to sort by, with optional `asc`/`desc` direction. Example: `\"fieldname1 asc, fieldname2 desc\"`."
+          },
+          {
+            "name": "include_total",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": true,
+              "title": "Include Total"
+            },
+            "description": "Include the total number of matching rows in the response. Defaults to `true`."
+          },
+          {
+            "name": "records_format",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "objects",
+                    "lists",
+                    "csv",
+                    "tsv"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": "objects",
+              "title": "Records Format"
+            },
+            "description": "Format for the returned records. `objects` returns a list of dicts, `lists` returns a list of lists, `csv` and `tsv` return delimited strings. Defaults to `objects`."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DatastoreSearchResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden \u2014 resource is private or the action is not permitted.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found \u2014 the resource_id does not exist in the DataStore.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests \u2014 rate limit exceeded.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error \u2014 unexpected server-side failure.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "datastore_search_post",
+        "summary": "Search a DataStore resource (POST)",
+        "description": "Identical to the GET form. Use POST to pass parameters as a JSON body, which is useful for large `filters` or `fields` payloads.",
+        "tags": [
+          "DataStore"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DatastoreSearchParams"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DatastoreSearchResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden \u2014 resource is private or the action is not permitted.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found \u2014 the resource_id does not exist in the DataStore.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests \u2014 rate limit exceeded.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error \u2014 unexpected server-side failure.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/datastore_search_sql": {
+      "get": {
+        "operationId": "datastore_search_sql_get",
+        "summary": "Query a DataStore resource with SQL",
+        "description": "Execute a SQL `SELECT` statement against one or more DataStore resources. Useful for aggregations, joins, and complex filtering that `datastore_search` cannot express.\n\nOnly `SELECT` statements are permitted.",
+        "tags": [
+          "DataStore"
+        ],
+        "parameters": [
+          {
+            "name": "sql",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "title": "Sql",
+              "type": "string"
+            },
+            "description": "A single SQL `SELECT` statement to execute against the DataStore. Required. Only `SELECT` statements are permitted \u2014 `INSERT`, `UPDATE`, `DELETE`, and DDL statements are not allowed. Table names correspond to resource IDs (e.g. `SELECT * FROM \"<resource_id>\"`)."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DatastoreSearchSqlResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden \u2014 resource is private or the action is not permitted.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found \u2014 the resource_id does not exist in the DataStore.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests \u2014 rate limit exceeded.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error \u2014 unexpected server-side failure.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "datastore_search_sql_post",
+        "summary": "Query a DataStore resource with SQL (POST)",
+        "description": "Identical to the GET form. Use POST for long SQL statements.",
+        "tags": [
+          "DataStore"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DatastoreSearchSqlParams"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DatastoreSearchSqlResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden \u2014 resource is private or the action is not permitted.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found \u2014 the resource_id does not exist in the DataStore.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests \u2014 rate limit exceeded.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error \u2014 unexpected server-side failure.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/datastore_info": {
+      "get": {
+        "operationId": "datastore_info_get",
+        "summary": "Get DataStore resource metadata",
+        "description": "Retrieve field definitions, type information, and optional size/count metadata for a DataStore resource.",
+        "tags": [
+          "DataStore"
+        ],
+        "parameters": [
+          {
+            "name": "resource_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "title": "Resource Id",
+              "type": "string"
+            },
+            "description": "The `id` or alias of the DataStore resource to describe. Required."
+          },
+          {
+            "name": "include_meta",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": true,
+              "title": "Include Meta"
+            },
+            "description": "Include size metrics and row count in the response (`count`, `db_size`, `idx_size`, `size`). Defaults to `true`."
+          },
+          {
+            "name": "include_fields_schema",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": true,
+              "title": "Include Fields Schema"
+            },
+            "description": "Include field index and uniqueness properties in each field descriptor. Defaults to `true`."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DatastoreInfoResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden \u2014 resource is private or the action is not permitted.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found \u2014 the resource_id does not exist in the DataStore.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests \u2014 rate limit exceeded.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error \u2014 unexpected server-side failure.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "datastore_info_post",
+        "summary": "Get DataStore resource metadata (POST)",
+        "description": "Identical to the GET form.",
+        "tags": [
+          "DataStore"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DatastoreInfoParams"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DatastoreInfoResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden \u2014 resource is private or the action is not permitted.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found \u2014 the resource_id does not exist in the DataStore.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests \u2014 rate limit exceeded.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error \u2014 unexpected server-side failure.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "DatastoreSearchParams": {
+        "properties": {
+          "resource_id": {
+            "description": "The `id` or alias of the resource to search. Required.",
+            "title": "Resource Id",
+            "type": "string"
+          },
+          "filters": {
+            "anyOf": [
+              {
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Matching conditions as a dictionary of `{field: value}` pairs. Rows must match all conditions. Example: `{\"country\": \"Uganda\"}`.",
+            "title": "Filters"
+          },
+          "q": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Full-text search query. Pass a string to search across all fields, or a dictionary of `{field: query}` to target specific fields. Note: behavior differs subtly from `filters` \u2014 `q` uses full-text ranking while `filters` performs exact matching.",
+            "title": "Q"
+          },
+          "full_text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Full-text search query applied across all fields. Similar to `q` with a string value, but always searches all fields. Cannot be combined with `q`.",
+            "title": "Full Text"
+          },
+          "distinct": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": false,
+            "description": "Return only unique rows. Defaults to `false`.",
+            "title": "Distinct"
+          },
+          "plain": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": true,
+            "description": "Treat the `q` query as plain text (no special FTS operators). Set to `false` to use PostgreSQL tsquery syntax. Defaults to `true`.",
+            "title": "Plain"
+          },
+          "language": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": "english",
+            "description": "Language used for full-text search stemming. Defaults to `english`.",
+            "title": "Language"
+          },
+          "limit": {
+            "anyOf": [
+              {
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": 100,
+            "description": "Maximum number of rows to return. Defaults to `100`.",
+            "title": "Limit"
+          },
+          "offset": {
+            "anyOf": [
+              {
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Number of rows to skip before returning results. Used for pagination.",
+            "title": "Offset"
+          },
+          "fields": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Columns to include in the response. Pass a comma-separated string or a list. Defaults to all fields.",
+            "title": "Fields"
+          },
+          "sort": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Comma-separated list of fields to sort by, with optional `asc`/`desc` direction. Example: `\"fieldname1 asc, fieldname2 desc\"`.",
+            "title": "Sort"
+          },
+          "include_total": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": true,
+            "description": "Include the total number of matching rows in the response. Defaults to `true`.",
+            "title": "Include Total"
+          },
+          "records_format": {
+            "anyOf": [
+              {
+                "enum": [
+                  "objects",
+                  "lists",
+                  "csv",
+                  "tsv"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": "objects",
+            "description": "Format for the returned records. `objects` returns a list of dicts, `lists` returns a list of lists, `csv` and `tsv` return delimited strings. Defaults to `objects`.",
+            "title": "Records Format"
+          }
+        },
+        "required": [
+          "resource_id"
+        ],
+        "title": "DatastoreSearchParams",
+        "type": "object"
+      },
+      "DatastoreSearchLinks": {
+        "properties": {
+          "start": {
+            "description": "URL to the first page of results with the same parameters.",
+            "title": "Start",
+            "type": "string"
+          },
+          "next": {
+            "description": "URL to the next page of results.",
+            "title": "Next",
+            "type": "string"
+          }
+        },
+        "required": [
+          "start",
+          "next"
+        ],
+        "title": "DatastoreSearchLinks",
+        "type": "object"
+      },
+      "DatastoreSearchResult": {
+        "properties": {
+          "resource_id": {
+            "description": "The resource ID that was queried.",
+            "title": "Resource Id",
+            "type": "string"
+          },
+          "fields": {
+            "description": "List of field descriptor objects, each with `id` and `type` keys.",
+            "items": {
+              "type": "object"
+            },
+            "title": "Fields",
+            "type": "array"
+          },
+          "offset": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "The offset used in the query.",
+            "title": "Offset"
+          },
+          "limit": {
+            "description": "The limit used in the query.",
+            "title": "Limit",
+            "type": "integer"
+          },
+          "filters": {
+            "anyOf": [
+              {
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Filters applied to the query.",
+            "title": "Filters"
+          },
+          "include_total": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Echoed from the request parameter. Indicates whether `total` is included.",
+            "title": "Include Total"
+          },
+          "records_format": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Echoed from the request parameter. Format used for `records`.",
+            "title": "Records Format"
+          },
+          "total": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Total number of matching rows. Present when `include_total` is `true`.",
+            "title": "Total"
+          },
+          "total_was_estimated": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Whether the total count was estimated rather than exact.",
+            "title": "Total Was Estimated"
+          },
+          "total_estimation_threshold": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Row count threshold above which total estimation is used. `null` when estimation is not configured.",
+            "title": "Total Estimation Threshold"
+          },
+          "records": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              {
+                "items": {
+                  "items": {},
+                  "type": "array"
+                },
+                "type": "array"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "description": "Matching rows. Shape depends on `records_format`.",
+            "title": "Records"
+          },
+          "_links": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DatastoreSearchLinks"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Pagination helper URLs. Always present \u2014 `next` contains the URL for the next page of results."
+          }
+        },
+        "required": [
+          "resource_id",
+          "fields",
+          "limit",
+          "records"
+        ],
+        "title": "DatastoreSearchResult",
+        "type": "object"
+      },
+      "DatastoreSearchResponse": {
+        "properties": {
+          "help": {
+            "description": "URL to the API documentation for this action.",
+            "title": "Help",
+            "type": "string"
+          },
+          "success": {
+            "description": "Whether the request succeeded.",
+            "title": "Success",
+            "type": "boolean"
+          },
+          "result": {
+            "$ref": "#/components/schemas/DatastoreSearchResult"
+          }
+        },
+        "required": [
+          "help",
+          "success",
+          "result"
+        ],
+        "title": "DatastoreSearchResponse",
+        "type": "object"
+      },
+      "DatastoreSearchSqlParams": {
+        "properties": {
+          "sql": {
+            "description": "A single SQL `SELECT` statement to execute against the DataStore. Required. Only `SELECT` statements are permitted \u2014 `INSERT`, `UPDATE`, `DELETE`, and DDL statements are not allowed. Table names correspond to resource IDs (e.g. `SELECT * FROM \"<resource_id>\"`).",
+            "title": "Sql",
+            "type": "string"
+          }
+        },
+        "required": [
+          "sql"
+        ],
+        "title": "DatastoreSearchSqlParams",
+        "type": "object"
+      },
+      "DatastoreSearchSqlResult": {
+        "properties": {
+          "sql": {
+            "description": "The SQL query echoed back from the request.",
+            "title": "Sql",
+            "type": "string"
+          },
+          "fields": {
+            "description": "List of field descriptor objects for the result columns, each with `id` and `type` keys.",
+            "items": {
+              "type": "object"
+            },
+            "title": "Fields",
+            "type": "array"
+          },
+          "records": {
+            "description": "List of result row objects.",
+            "items": {
+              "type": "object"
+            },
+            "title": "Records",
+            "type": "array"
+          },
+          "records_truncated": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Present and `true` if the result set was truncated due to a server-side row limit.",
+            "title": "Records Truncated"
+          }
+        },
+        "required": [
+          "sql",
+          "fields",
+          "records"
+        ],
+        "title": "DatastoreSearchSqlResult",
+        "type": "object"
+      },
+      "DatastoreSearchSqlResponse": {
+        "properties": {
+          "help": {
+            "description": "URL to the API documentation for this action.",
+            "title": "Help",
+            "type": "string"
+          },
+          "success": {
+            "description": "Whether the request succeeded.",
+            "title": "Success",
+            "type": "boolean"
+          },
+          "result": {
+            "$ref": "#/components/schemas/DatastoreSearchSqlResult"
+          }
+        },
+        "required": [
+          "help",
+          "success",
+          "result"
+        ],
+        "title": "DatastoreSearchSqlResponse",
+        "type": "object"
+      },
+      "DatastoreInfoParams": {
+        "properties": {
+          "resource_id": {
+            "description": "The `id` or alias of the DataStore resource to describe. Required.",
+            "title": "Resource Id",
+            "type": "string"
+          },
+          "include_meta": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": true,
+            "description": "Include size metrics and row count in the response (`count`, `db_size`, `idx_size`, `size`). Defaults to `true`.",
+            "title": "Include Meta"
+          },
+          "include_fields_schema": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": true,
+            "description": "Include field index and uniqueness properties in each field descriptor. Defaults to `true`.",
+            "title": "Include Fields Schema"
+          }
+        },
+        "required": [
+          "resource_id"
+        ],
+        "title": "DatastoreInfoParams",
+        "type": "object"
+      },
+      "DatastoreInfoResult": {
+        "properties": {
+          "meta": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DatastoreResourceMeta"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Resource metadata. Present when `include_meta` is `true`."
+          },
+          "fields": {
+            "description": "List of field descriptor objects. Each contains `id`, `type`, and optionally `schema` (with index and uniqueness info when `include_fields_schema` is `true`).",
+            "items": {
+              "type": "object"
+            },
+            "title": "Fields",
+            "type": "array"
+          }
+        },
+        "required": [
+          "fields"
+        ],
+        "title": "DatastoreInfoResult",
+        "type": "object"
+      },
+      "DatastoreResourceMeta": {
+        "properties": {
+          "aliases": {
+            "description": "List of aliases defined for this resource.",
+            "items": {
+              "type": "string"
+            },
+            "title": "Aliases",
+            "type": "array"
+          },
+          "count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Total number of rows in the resource table.",
+            "title": "Count"
+          },
+          "db_size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Total size of the database in bytes.",
+            "title": "Db Size"
+          },
+          "id": {
+            "description": "The resource ID.",
+            "title": "Id",
+            "type": "string"
+          },
+          "idx_size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Size of indexes on this resource table in bytes.",
+            "title": "Idx Size"
+          },
+          "size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Size of this resource table in bytes.",
+            "title": "Size"
+          },
+          "table_type": {
+            "anyOf": [
+              {
+                "enum": [
+                  "BASE TABLE",
+                  "VIEW",
+                  "FOREIGN",
+                  "LOCAL TEMPORARY"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "PostgreSQL table type for this resource.",
+            "title": "Table Type"
+          }
+        },
+        "required": [
+          "aliases",
+          "id"
+        ],
+        "title": "DatastoreResourceMeta",
+        "type": "object"
+      },
+      "DatastoreInfoResponse": {
+        "properties": {
+          "help": {
+            "description": "URL to the API documentation for this action.",
+            "title": "Help",
+            "type": "string"
+          },
+          "success": {
+            "description": "Whether the request succeeded.",
+            "title": "Success",
+            "type": "boolean"
+          },
+          "result": {
+            "$ref": "#/components/schemas/DatastoreInfoResult"
+          }
+        },
+        "required": [
+          "help",
+          "success",
+          "result"
+        ],
+        "title": "DatastoreInfoResponse",
+        "type": "object"
+      },
+      "ErrorResponse": {
+        "properties": {
+          "success": {
+            "default": false,
+            "description": "Always false for error responses.",
+            "title": "Success",
+            "type": "boolean"
+          },
+          "error": {
+            "description": "Error detail object containing a 'message' key and optional additional fields.",
+            "title": "Error",
+            "type": "object"
+          }
+        },
+        "required": [
+          "error"
+        ],
+        "title": "ErrorResponse",
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "ApiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization",
+        "description": "CKAN API key. Required for all DataStore requests on HDX, including public resources."
+      }
+    }
+  },
+  "security": [
+    {
+      "ApiKeyAuth": []
+    }
+  ]
+}
