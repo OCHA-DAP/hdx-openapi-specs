@@ -1,0 +1,37 @@
+name: Generate OpenAPI Spec
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  generate:
+    name: Generate openapi.json
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install "pydantic>=2.0"
+
+      - name: Generate spec
+        run: python generate.py
+
+      - name: Validate spec exists
+        run: test -f dist/openapi.json && echo "✓ dist/openapi.json exists"
+
+      - name: Upload spec artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: openapi-spec
+          path: dist/openapi.json
