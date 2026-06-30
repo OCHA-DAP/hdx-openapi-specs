@@ -34,7 +34,7 @@ generate.py               # Assembles and writes dist/openapi.json
 **Requirements:** Python 3.11+
 
 ```bash
-pip install pydantic
+pip install -e .
 python generate.py
 # → dist/openapi.json
 ```
