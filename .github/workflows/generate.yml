@@ -7,6 +7,7 @@ on:
     branches: [main]
   workflow_dispatch:
 
+# Safe default — each job declares only the permissions it actually needs.
 permissions:
   contents: read
 
@@ -14,6 +15,8 @@ jobs:
   generate:
     name: Generate openapi.json
     runs-on: ubuntu-latest
+    permissions:
+      contents: write  # needed to auto-commit the regenerated spec
     steps:
       - uses: actions/checkout@v4
 
@@ -22,16 +25,38 @@ jobs:
           python-version: "3.11"
 
       - name: Install dependencies
-        run: pip install "pydantic>=2.0"
+        run: pip install -e .
 
+      # Rebuilds dist/openapi.json from the Pydantic models in models/
       - name: Generate spec
         run: python generate.py
 
-      - name: Validate spec exists
-        run: test -f dist/openapi.json && echo "✓ dist/openapi.json exists"
-
-      - name: Upload spec artifact
-        uses: actions/upload-artifact@v4
+      # Only commits if dist/openapi.json changed — no-op on clean runs
+      - name: Commit updated spec
+        uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          name: openapi-spec
-          path: dist/openapi.json
+          commit_message: "chore: regenerate openapi.json"
+          file_pattern: dist/openapi.json
+
+      # Packages dist/ for the deploy job — includes openapi.json and index.html
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist/
+
+  # Only runs on pushes to main — PRs generate and validate but do not deploy
+  deploy:
+    name: Deploy to GitHub Pages
+    needs: generate
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write      # publish to GitHub Pages
+      id-token: write   # authenticate via OIDC (required by deploy-pages)
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
