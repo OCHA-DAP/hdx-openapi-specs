@@ -46,6 +46,7 @@
             "schema": {
               "anyOf": [
                 {
+                  "additionalProperties": true,
                   "type": "object"
                 },
                 {
@@ -67,6 +68,7 @@
                   "type": "string"
                 },
                 {
+                  "additionalProperties": true,
                   "type": "object"
                 },
                 {
@@ -1111,6 +1113,7 @@
           "filters": {
             "anyOf": [
               {
+                "additionalProperties": true,
                 "type": "object"
               },
               {
@@ -1127,6 +1130,7 @@
                 "type": "string"
               },
               {
+                "additionalProperties": true,
                 "type": "object"
               },
               {
@@ -1331,6 +1335,7 @@
           "fields": {
             "description": "List of field descriptor objects, each with `id` and `type` keys.",
             "items": {
+              "additionalProperties": true,
               "type": "object"
             },
             "title": "Fields",
@@ -1357,6 +1362,7 @@
           "filters": {
             "anyOf": [
               {
+                "additionalProperties": true,
                 "type": "object"
               },
               {
@@ -1436,6 +1442,7 @@
             "anyOf": [
               {
                 "items": {
+                  "additionalProperties": true,
                   "type": "object"
                 },
                 "type": "array"
@@ -1517,6 +1524,7 @@
           "fields": {
             "description": "List of field descriptor objects for the result columns, each with `id` and `type` keys.",
             "items": {
+              "additionalProperties": true,
               "type": "object"
             },
             "title": "Fields",
@@ -1525,6 +1533,7 @@
           "records": {
             "description": "List of result row objects.",
             "items": {
+              "additionalProperties": true,
               "type": "object"
             },
             "title": "Records",
@@ -1607,6 +1616,7 @@
           "fields": {
             "description": "List of field descriptor objects. Each contains `id`, `type`, and optionally `schema` with index and uniqueness information.",
             "items": {
+              "additionalProperties": true,
               "type": "object"
             },
             "title": "Fields",
@@ -1944,12 +1954,14 @@
           "results": {
             "description": "List of matching dataset objects.",
             "items": {
+              "additionalProperties": true,
               "type": "object"
             },
             "title": "Results",
             "type": "array"
           },
           "search_facets": {
+            "additionalProperties": true,
             "description": "Facet counts keyed by field name. Each value contains an `items` list of `{name, display_name, count}` objects.",
             "title": "Search Facets",
             "type": "object"
@@ -1996,6 +2008,7 @@
             "type": "boolean"
           },
           "error": {
+            "additionalProperties": true,
             "description": "Error detail object containing a 'message' key and optional additional fields.",
             "title": "Error",
             "type": "object"
