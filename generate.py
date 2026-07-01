@@ -12,6 +12,7 @@ from models.common import ErrorResponse
 from models.datastore_info import DatastoreInfoParams, DatastoreInfoResponse
 from models.datastore_search import DatastoreSearchParams, DatastoreSearchResponse
 from models.datastore_search_sql import DatastoreSearchSqlParams, DatastoreSearchSqlResponse
+from models.package_search import PackageSearchParams, PackageSearchResponse
 
 DIST = Path("dist")
 
@@ -22,7 +23,18 @@ BASE_URL = "https://data.humdata.org/api/3/action"
 CKAN_ACTION_NOTE = (
     "CKAN actions accept parameters as either query string parameters (GET) "
     "or a JSON body (POST). Both methods are equivalent. "
-    "All requests must include the `Authorization` header when accessing private resources."
+    "All requests to HDX must include the `Authorization` header."
+)
+
+TDE_DESCRIPTION = (
+    "## Tabular Data Endpoints\n\n"
+    "The HDX **Tabular Data Endpoints (TDE)** provide programmatic access to tabular datasets "
+    "hosted on HDX. Powered by the CKAN DataStore extension, they support real-time querying, "
+    "customizable filters, and dataset joins.\n\n"
+    "- **`datastore_search`** — simple filters, browsing data, or building lightweight applications\n"
+    "- **`datastore_search_sql`** — analytical purposes or when multiple conditions and calculations are required\n"
+    "- **`datastore_info`** — schema information about a resource, including column names and data types\n\n"
+    "Also covered: **`package_search`** for searching datasets in the HDX catalog."
 )
 
 
@@ -47,7 +59,7 @@ def _error_response(description: str) -> dict:
 
 def _common_errors() -> dict:
     return {
-        "403": _error_response("Forbidden — resource is private or the action is not permitted."),
+        "403": _error_response("Forbidden — unauthenticated request, or the action is not permitted."),
         "404": _error_response("Not Found — the resource_id does not exist in the DataStore."),
         "429": _error_response("Too Many Requests — rate limit exceeded."),
         "500": _error_response("Internal Server Error — unexpected server-side failure."),
@@ -62,12 +74,11 @@ def build_spec() -> dict:
             "version": "2.11.4",
             "description": (
                 "OpenAPI specification for the CKAN DataStore API as exposed by the "
-                "Humanitarian Data Exchange (HDX). "
-                "Covers the Tabular Data Endpoints (TDE): `datastore_search`, "
-                "`datastore_search_sql`, and `datastore_info`.\n\n"
+                "Humanitarian Data Exchange (HDX).\n\n"
+                f"{TDE_DESCRIPTION}\n\n"
                 f"{CKAN_ACTION_NOTE}\n\n"
                 "> **Note:** This specification documents behavior as described in the "
-                "[CKAN 2.11.4 documentation](https://docs.ckan.org/en/latest/maintaining/datastore.html). "
+                "[CKAN 2.11 documentation](https://docs.ckan.org/en/2.11/maintaining/datastore.html). "
                 "Some parameter interactions (e.g. `filters` vs `q` in `datastore_search`) "
                 "have nuanced behavior that is not fully captured here."
             ),
@@ -90,6 +101,7 @@ def build_spec() -> dict:
             "/datastore_search": _datastore_search_path(),
             "/datastore_search_sql": _datastore_search_sql_path(),
             "/datastore_info": _datastore_info_path(),
+            "/package_search": _package_search_path(),
         },
         "components": {
             "schemas": _collect_schemas(),
@@ -98,7 +110,7 @@ def build_spec() -> dict:
                     "type": "apiKey",
                     "in": "header",
                     "name": "Authorization",
-                    "description": "CKAN API key. Required for all DataStore requests on HDX, including public resources.",
+                    "description": "CKAN API key. Required for all requests on HDX, including public resources.",
                 }
             },
         },
@@ -220,7 +232,7 @@ def _datastore_info_path() -> dict:
             "operationId": "datastore_info_get",
             "summary": "Get DataStore resource metadata",
             "description": (
-                "Retrieve field definitions, type information, and optional size/count metadata "
+                "Retrieve field definitions, type information, and size/count metadata "
                 "for a DataStore resource."
             ),
             "tags": ["DataStore"],
@@ -265,6 +277,61 @@ def _datastore_info_path() -> dict:
     }
 
 
+def _package_search_path() -> dict:
+    return {
+        "get": {
+            "operationId": "package_search_get",
+            "summary": "Search datasets",
+            "description": (
+                "Search for datasets (packages) using Solr query syntax. "
+                "Supports filtering, faceting, sorting, and pagination.\n\n"
+                "Pass parameters as query string arguments (GET) or as a JSON body (POST)."
+            ),
+            "tags": ["Catalog"],
+            "parameters": _params_from_model(PackageSearchParams),
+            "responses": {
+                "200": {
+                    "description": "Successful response.",
+                    "content": {
+                        "application/json": {
+                            "schema": _ref("PackageSearchResponse")
+                        }
+                    },
+                },
+                **_common_errors(),
+            },
+        },
+        "post": {
+            "operationId": "package_search_post",
+            "summary": "Search datasets (POST)",
+            "description": (
+                "Identical to the GET form. Use POST to pass parameters as a JSON body, "
+                "which is useful for long `fq_list` or `facet.field` values."
+            ),
+            "tags": ["Catalog"],
+            "requestBody": {
+                "required": True,
+                "content": {
+                    "application/json": {
+                        "schema": _ref("PackageSearchParams")
+                    }
+                },
+            },
+            "responses": {
+                "200": {
+                    "description": "Successful response.",
+                    "content": {
+                        "application/json": {
+                            "schema": _ref("PackageSearchResponse")
+                        }
+                    },
+                },
+                **_common_errors(),
+            },
+        },
+    }
+
+
 def _params_from_model(model) -> list[dict]:
     schema = model.model_json_schema()
     required = set(schema.get("required", []))
@@ -292,6 +359,8 @@ def _collect_schemas() -> dict:
         DatastoreSearchSqlResponse,
         DatastoreInfoParams,
         DatastoreInfoResponse,
+        PackageSearchParams,
+        PackageSearchResponse,
         ErrorResponse,
     ]:
         name = model.__name__

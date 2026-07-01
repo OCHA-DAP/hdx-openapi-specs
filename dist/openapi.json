@@ -3,7 +3,7 @@
   "info": {
     "title": "HDX CKAN DataStore API",
     "version": "2.11.4",
-    "description": "OpenAPI specification for the CKAN DataStore API as exposed by the Humanitarian Data Exchange (HDX). Covers the Tabular Data Endpoints (TDE): `datastore_search`, `datastore_search_sql`, and `datastore_info`.\n\nCKAN actions accept parameters as either query string parameters (GET) or a JSON body (POST). Both methods are equivalent. All requests must include the `Authorization` header when accessing private resources.\n\n> **Note:** This specification documents behavior as described in the [CKAN 2.11.4 documentation](https://docs.ckan.org/en/latest/maintaining/datastore.html). Some parameter interactions (e.g. `filters` vs `q` in `datastore_search`) have nuanced behavior that is not fully captured here.",
+    "description": "OpenAPI specification for the CKAN DataStore API as exposed by the Humanitarian Data Exchange (HDX).\n\n## Tabular Data Endpoints\n\nThe HDX **Tabular Data Endpoints (TDE)** provide programmatic access to tabular datasets hosted on HDX. Powered by the CKAN DataStore extension, they support real-time querying, customizable filters, and dataset joins.\n\n- **`datastore_search`** \u2014 simple filters, browsing data, or building lightweight applications\n- **`datastore_search_sql`** \u2014 analytical purposes or when multiple conditions and calculations are required\n- **`datastore_info`** \u2014 schema information about a resource, including column names and data types\n\nAlso covered: **`package_search`** for searching datasets in the HDX catalog.\n\nCKAN actions accept parameters as either query string parameters (GET) or a JSON body (POST). Both methods are equivalent. All requests to HDX must include the `Authorization` header.\n\n> **Note:** This specification documents behavior as described in the [CKAN 2.11 documentation](https://docs.ckan.org/en/2.11/maintaining/datastore.html). Some parameter interactions (e.g. `filters` vs `q` in `datastore_search`) have nuanced behavior that is not fully captured here.",
     "contact": {
       "name": "HDX Team",
       "url": "https://data.humdata.org"
@@ -46,7 +46,6 @@
             "schema": {
               "anyOf": [
                 {
-                  "additionalProperties": true,
                   "type": "object"
                 },
                 {
@@ -68,7 +67,6 @@
                   "type": "string"
                 },
                 {
-                  "additionalProperties": true,
                   "type": "object"
                 },
                 {
@@ -251,6 +249,24 @@
             "description": "Include the total number of matching rows in the response. Defaults to `true`."
           },
           {
+            "name": "total_estimation_threshold",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Total Estimation Threshold"
+            },
+            "description": "When `include_total` is `true` and the estimated row count exceeds this threshold, CKAN returns an estimated total rather than an exact count. Set to `null` (default) to always return an exact count."
+          },
+          {
             "name": "records_format",
             "in": "query",
             "required": false,
@@ -287,7 +303,7 @@
             }
           },
           "403": {
-            "description": "Forbidden \u2014 resource is private or the action is not permitted.",
+            "description": "Forbidden \u2014 unauthenticated request, or the action is not permitted.",
             "content": {
               "application/json": {
                 "schema": {
@@ -357,7 +373,7 @@
             }
           },
           "403": {
-            "description": "Forbidden \u2014 resource is private or the action is not permitted.",
+            "description": "Forbidden \u2014 unauthenticated request, or the action is not permitted.",
             "content": {
               "application/json": {
                 "schema": {
@@ -431,7 +447,7 @@
             }
           },
           "403": {
-            "description": "Forbidden \u2014 resource is private or the action is not permitted.",
+            "description": "Forbidden \u2014 unauthenticated request, or the action is not permitted.",
             "content": {
               "application/json": {
                 "schema": {
@@ -501,7 +517,7 @@
             }
           },
           "403": {
-            "description": "Forbidden \u2014 resource is private or the action is not permitted.",
+            "description": "Forbidden \u2014 unauthenticated request, or the action is not permitted.",
             "content": {
               "application/json": {
                 "schema": {
@@ -547,7 +563,7 @@
       "get": {
         "operationId": "datastore_info_get",
         "summary": "Get DataStore resource metadata",
-        "description": "Retrieve field definitions, type information, and optional size/count metadata for a DataStore resource.",
+        "description": "Retrieve field definitions, type information, and size/count metadata for a DataStore resource.",
         "tags": [
           "DataStore"
         ],
@@ -561,42 +577,6 @@
               "type": "string"
             },
             "description": "The `id` or alias of the DataStore resource to describe. Required."
-          },
-          {
-            "name": "include_meta",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "boolean"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "default": true,
-              "title": "Include Meta"
-            },
-            "description": "Include size metrics and row count in the response (`count`, `db_size`, `idx_size`, `size`). Defaults to `true`."
-          },
-          {
-            "name": "include_fields_schema",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "boolean"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "default": true,
-              "title": "Include Fields Schema"
-            },
-            "description": "Include field index and uniqueness properties in each field descriptor. Defaults to `true`."
           }
         ],
         "responses": {
@@ -611,7 +591,7 @@
             }
           },
           "403": {
-            "description": "Forbidden \u2014 resource is private or the action is not permitted.",
+            "description": "Forbidden \u2014 unauthenticated request, or the action is not permitted.",
             "content": {
               "application/json": {
                 "schema": {
@@ -681,7 +661,402 @@
             }
           },
           "403": {
-            "description": "Forbidden \u2014 resource is private or the action is not permitted.",
+            "description": "Forbidden \u2014 unauthenticated request, or the action is not permitted.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found \u2014 the resource_id does not exist in the DataStore.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests \u2014 rate limit exceeded.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error \u2014 unexpected server-side failure.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/package_search": {
+      "get": {
+        "operationId": "package_search_get",
+        "summary": "Search datasets",
+        "description": "Search for datasets (packages) using Solr query syntax. Supports filtering, faceting, sorting, and pagination.\n\nPass parameters as query string arguments (GET) or as a JSON body (POST).",
+        "tags": [
+          "Catalog"
+        ],
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": "*:*",
+              "title": "Q"
+            },
+            "description": "Solr search query. Supports Solr syntax. Defaults to `\"*:*\"` (all datasets)."
+          },
+          {
+            "name": "fq",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Fq"
+            },
+            "description": "Solr filter query. Restricts results without affecting relevance scoring."
+          },
+          {
+            "name": "fq_list",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Fq List"
+            },
+            "description": "Additional filter queries as a list. Each entry is ANDed with `fq`."
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": "score desc, metadata_modified desc",
+              "title": "Sort"
+            },
+            "description": "Sort order as a Solr sort string. Defaults to `\"score desc, metadata_modified desc\"`."
+          },
+          {
+            "name": "rows",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maximum": 1000,
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": 10,
+              "title": "Rows"
+            },
+            "description": "Maximum number of datasets to return. Defaults to `10`, maximum `1000`."
+          },
+          {
+            "name": "start",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Start"
+            },
+            "description": "Offset into the result set. Used for pagination."
+          },
+          {
+            "name": "facet",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": "true",
+              "title": "Facet"
+            },
+            "description": "Enable faceted results. Defaults to `\"true\"`."
+          },
+          {
+            "name": "facet.mincount",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Facet.Mincount"
+            },
+            "description": "Minimum count for a facet value to be included in the response."
+          },
+          {
+            "name": "facet.limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": 50,
+              "title": "Facet.Limit"
+            },
+            "description": "Maximum number of values returned per facet field. Defaults to `50`."
+          },
+          {
+            "name": "facet.field",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Facet.Field"
+            },
+            "description": "Fields to facet on."
+          },
+          {
+            "name": "include_drafts",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": false,
+              "title": "Include Drafts"
+            },
+            "description": "Include draft datasets in results. Requires authentication as the owning user or org admin. Defaults to `false`."
+          },
+          {
+            "name": "include_deleted",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": false,
+              "title": "Include Deleted"
+            },
+            "description": "Include deleted datasets in results. Defaults to `false`."
+          },
+          {
+            "name": "include_private",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": false,
+              "title": "Include Private"
+            },
+            "description": "Include private datasets in results. Requires authentication as a member of the owning organisation. Defaults to `false`."
+          },
+          {
+            "name": "use_default_schema",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": false,
+              "title": "Use Default Schema"
+            },
+            "description": "Return results using the default package schema rather than any custom schema configured on the instance. Defaults to `false`."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PackageSearchResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden \u2014 unauthenticated request, or the action is not permitted.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found \u2014 the resource_id does not exist in the DataStore.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests \u2014 rate limit exceeded.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error \u2014 unexpected server-side failure.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "package_search_post",
+        "summary": "Search datasets (POST)",
+        "description": "Identical to the GET form. Use POST to pass parameters as a JSON body, which is useful for long `fq_list` or `facet.field` values.",
+        "tags": [
+          "Catalog"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PackageSearchParams"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PackageSearchResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden \u2014 unauthenticated request, or the action is not permitted.",
             "content": {
               "application/json": {
                 "schema": {
@@ -736,7 +1111,6 @@
           "filters": {
             "anyOf": [
               {
-                "additionalProperties": true,
                 "type": "object"
               },
               {
@@ -753,7 +1127,6 @@
                 "type": "string"
               },
               {
-                "additionalProperties": true,
                 "type": "object"
               },
               {
@@ -889,6 +1262,19 @@
             "description": "Include the total number of matching rows in the response. Defaults to `true`.",
             "title": "Include Total"
           },
+          "total_estimation_threshold": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "When `include_total` is `true` and the estimated row count exceeds this threshold, CKAN returns an estimated total rather than an exact count. Set to `null` (default) to always return an exact count.",
+            "title": "Total Estimation Threshold"
+          },
           "records_format": {
             "anyOf": [
               {
@@ -945,7 +1331,6 @@
           "fields": {
             "description": "List of field descriptor objects, each with `id` and `type` keys.",
             "items": {
-              "additionalProperties": true,
               "type": "object"
             },
             "title": "Fields",
@@ -972,7 +1357,6 @@
           "filters": {
             "anyOf": [
               {
-                "additionalProperties": true,
                 "type": "object"
               },
               {
@@ -1052,7 +1436,6 @@
             "anyOf": [
               {
                 "items": {
-                  "additionalProperties": true,
                   "type": "object"
                 },
                 "type": "array"
@@ -1072,15 +1455,7 @@
             "title": "Records"
           },
           "_links": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/DatastoreSearchLinks"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "default": null,
+            "$ref": "#/components/schemas/DatastoreSearchLinks",
             "description": "Pagination helper URLs. Always present \u2014 `next` contains the URL for the next page of results."
           }
         },
@@ -1088,7 +1463,8 @@
           "resource_id",
           "fields",
           "limit",
-          "records"
+          "records",
+          "_links"
         ],
         "title": "DatastoreSearchResult",
         "type": "object"
@@ -1141,7 +1517,6 @@
           "fields": {
             "description": "List of field descriptor objects for the result columns, each with `id` and `type` keys.",
             "items": {
-              "additionalProperties": true,
               "type": "object"
             },
             "title": "Fields",
@@ -1150,7 +1525,6 @@
           "records": {
             "description": "List of result row objects.",
             "items": {
-              "additionalProperties": true,
               "type": "object"
             },
             "title": "Records",
@@ -1166,7 +1540,7 @@
               }
             ],
             "default": null,
-            "description": "Present and `true` if the result set was truncated due to a server-side row limit.",
+            "description": "Present and `true` if the result set was truncated at the server-side 32,000-row limit.",
             "title": "Records Truncated"
           }
         },
@@ -1208,32 +1582,6 @@
             "description": "The `id` or alias of the DataStore resource to describe. Required.",
             "title": "Resource Id",
             "type": "string"
-          },
-          "include_meta": {
-            "anyOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "default": true,
-            "description": "Include size metrics and row count in the response (`count`, `db_size`, `idx_size`, `size`). Defaults to `true`.",
-            "title": "Include Meta"
-          },
-          "include_fields_schema": {
-            "anyOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "default": true,
-            "description": "Include field index and uniqueness properties in each field descriptor. Defaults to `true`.",
-            "title": "Include Fields Schema"
           }
         },
         "required": [
@@ -1254,12 +1602,11 @@
               }
             ],
             "default": null,
-            "description": "Resource metadata. Present when `include_meta` is `true`."
+            "description": "Resource metadata including aliases, row count, and size information."
           },
           "fields": {
-            "description": "List of field descriptor objects. Each contains `id`, `type`, and optionally `schema` (with index and uniqueness info when `include_fields_schema` is `true`).",
+            "description": "List of field descriptor objects. Each contains `id`, `type`, and optionally `schema` with index and uniqueness information.",
             "items": {
-              "additionalProperties": true,
               "type": "object"
             },
             "title": "Fields",
@@ -1305,7 +1652,7 @@
               }
             ],
             "default": null,
-            "description": "Total size of the database in bytes.",
+            "description": "Total size of the DataStore database in bytes (all tables, not just this resource).",
             "title": "Db Size"
           },
           "id": {
@@ -1390,6 +1737,256 @@
         "title": "DatastoreInfoResponse",
         "type": "object"
       },
+      "PackageSearchParams": {
+        "properties": {
+          "q": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": "*:*",
+            "description": "Solr search query. Supports Solr syntax. Defaults to `\"*:*\"` (all datasets).",
+            "title": "Q"
+          },
+          "fq": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Solr filter query. Restricts results without affecting relevance scoring.",
+            "title": "Fq"
+          },
+          "fq_list": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Additional filter queries as a list. Each entry is ANDed with `fq`.",
+            "title": "Fq List"
+          },
+          "sort": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": "score desc, metadata_modified desc",
+            "description": "Sort order as a Solr sort string. Defaults to `\"score desc, metadata_modified desc\"`.",
+            "title": "Sort"
+          },
+          "rows": {
+            "anyOf": [
+              {
+                "maximum": 1000,
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": 10,
+            "description": "Maximum number of datasets to return. Defaults to `10`, maximum `1000`.",
+            "title": "Rows"
+          },
+          "start": {
+            "anyOf": [
+              {
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Offset into the result set. Used for pagination.",
+            "title": "Start"
+          },
+          "facet": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": "true",
+            "description": "Enable faceted results. Defaults to `\"true\"`.",
+            "title": "Facet"
+          },
+          "facet.mincount": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Minimum count for a facet value to be included in the response.",
+            "title": "Facet.Mincount"
+          },
+          "facet.limit": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": 50,
+            "description": "Maximum number of values returned per facet field. Defaults to `50`.",
+            "title": "Facet.Limit"
+          },
+          "facet.field": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Fields to facet on.",
+            "title": "Facet.Field"
+          },
+          "include_drafts": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": false,
+            "description": "Include draft datasets in results. Requires authentication as the owning user or org admin. Defaults to `false`.",
+            "title": "Include Drafts"
+          },
+          "include_deleted": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": false,
+            "description": "Include deleted datasets in results. Defaults to `false`.",
+            "title": "Include Deleted"
+          },
+          "include_private": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": false,
+            "description": "Include private datasets in results. Requires authentication as a member of the owning organisation. Defaults to `false`.",
+            "title": "Include Private"
+          },
+          "use_default_schema": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": false,
+            "description": "Return results using the default package schema rather than any custom schema configured on the instance. Defaults to `false`.",
+            "title": "Use Default Schema"
+          }
+        },
+        "title": "PackageSearchParams",
+        "type": "object"
+      },
+      "PackageSearchResult": {
+        "properties": {
+          "count": {
+            "description": "Total number of datasets matching the query.",
+            "title": "Count",
+            "type": "integer"
+          },
+          "results": {
+            "description": "List of matching dataset objects.",
+            "items": {
+              "type": "object"
+            },
+            "title": "Results",
+            "type": "array"
+          },
+          "search_facets": {
+            "description": "Facet counts keyed by field name. Each value contains an `items` list of `{name, display_name, count}` objects.",
+            "title": "Search Facets",
+            "type": "object"
+          }
+        },
+        "required": [
+          "count",
+          "results",
+          "search_facets"
+        ],
+        "title": "PackageSearchResult",
+        "type": "object"
+      },
+      "PackageSearchResponse": {
+        "properties": {
+          "help": {
+            "description": "URL to the API documentation for this action.",
+            "title": "Help",
+            "type": "string"
+          },
+          "success": {
+            "description": "Whether the request succeeded.",
+            "title": "Success",
+            "type": "boolean"
+          },
+          "result": {
+            "$ref": "#/components/schemas/PackageSearchResult"
+          }
+        },
+        "required": [
+          "help",
+          "success",
+          "result"
+        ],
+        "title": "PackageSearchResponse",
+        "type": "object"
+      },
       "ErrorResponse": {
         "properties": {
           "success": {
@@ -1399,7 +1996,6 @@
             "type": "boolean"
           },
           "error": {
-            "additionalProperties": true,
             "description": "Error detail object containing a 'message' key and optional additional fields.",
             "title": "Error",
             "type": "object"
@@ -1417,7 +2013,7 @@
         "type": "apiKey",
         "in": "header",
         "name": "Authorization",
-        "description": "CKAN API key. Required for all DataStore requests on HDX, including public resources."
+        "description": "CKAN API key. Required for all requests on HDX, including public resources."
       }
     }
   },

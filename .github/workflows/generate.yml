@@ -25,11 +25,14 @@ jobs:
           python-version: "3.11"
 
       - name: Install dependencies
-        run: pip install -e .
+        run: pip install -e . openapi-spec-validator
 
       # Rebuilds dist/openapi.json from the Pydantic models in models/
       - name: Generate spec
         run: python generate.py
+
+      - name: Validate OpenAPI spec
+        run: python -m openapi_spec_validator dist/openapi.json
 
       # Only commits if dist/openapi.json changed — no-op on clean runs
       - name: Commit updated spec

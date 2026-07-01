@@ -35,5 +35,5 @@ class DatastoreSearchSqlResult(BaseModel):
     )
     records_truncated: bool | None = Field(
         None,
-        description="Present and `true` if the result set was truncated due to a server-side row limit.",
+        description="Present and `true` if the result set was truncated at the server-side 32,000-row limit.",
     )

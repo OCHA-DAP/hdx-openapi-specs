@@ -74,6 +74,14 @@ class DatastoreSearchParams(BaseModel):
         True,
         description="Include the total number of matching rows in the response. Defaults to `true`.",
     )
+    total_estimation_threshold: int | None = Field(
+        None,
+        description=(
+            "When `include_total` is `true` and the estimated row count exceeds this threshold, "
+            "CKAN returns an estimated total rather than an exact count. "
+            "Set to `null` (default) to always return an exact count."
+        ),
+    )
     records_format: Literal["objects", "lists", "csv", "tsv"] | None = Field(
         "objects",
         description=(
@@ -132,8 +140,8 @@ class DatastoreSearchResult(BaseModel):
         ...,
         description="Matching rows. Shape depends on `records_format`.",
     )
-    links: DatastoreSearchLinks | None = Field(
-        None,
+    links: DatastoreSearchLinks = Field(
+        ...,
         alias="_links",
         description="Pagination helper URLs. Always present — `next` contains the URL for the next page of results.",
     )
