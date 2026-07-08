@@ -359,7 +359,8 @@
               }
             }
           }
-        }
+        },
+        "x-hideTryItPanel": true
       },
       "post": {
         "operationId": "datastore_search_post",
@@ -444,7 +445,8 @@
               }
             }
           }
-        }
+        },
+        "x-hideTryItPanel": true
       }
     },
     "/datastore_search_sql": {
@@ -533,7 +535,8 @@
               }
             }
           }
-        }
+        },
+        "x-hideTryItPanel": true
       },
       "post": {
         "operationId": "datastore_search_sql_post",
@@ -618,7 +621,8 @@
               }
             }
           }
-        }
+        },
+        "x-hideTryItPanel": true
       }
     },
     "/datastore_info": {
@@ -707,7 +711,8 @@
               }
             }
           }
-        }
+        },
+        "x-hideTryItPanel": true
       },
       "post": {
         "operationId": "datastore_info_post",
@@ -792,7 +797,8 @@
               }
             }
           }
-        }
+        },
+        "x-hideTryItPanel": true
       }
     },
     "/package_search": {
@@ -806,7 +812,7 @@
         "security": [
           {},
           {
-            "ApiKeyAuth": []
+            "ApiKeyAuthCatalog": []
           }
         ],
         "parameters": [
@@ -1133,7 +1139,8 @@
               }
             }
           }
-        }
+        },
+        "x-hideTryItPanel": true
       },
       "post": {
         "operationId": "package_search_post",
@@ -1145,7 +1152,7 @@
         "security": [
           {},
           {
-            "ApiKeyAuth": []
+            "ApiKeyAuthCatalog": []
           }
         ],
         "requestBody": {
@@ -1219,7 +1226,8 @@
               }
             }
           }
-        }
+        },
+        "x-hideTryItPanel": true
       }
     }
   },
@@ -2218,6 +2226,12 @@
         "in": "header",
         "name": "Authorization",
         "description": "HDX API token. Required for all Tabular Data Endpoint requests, including public resources."
+      },
+      "ApiKeyAuthCatalog": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization",
+        "description": "HDX API token. Optional \u2014 public dataset search needs no authentication; a token is only required to include private or draft datasets."
       }
     }
   }

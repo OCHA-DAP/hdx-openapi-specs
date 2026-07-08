@@ -46,6 +46,8 @@ DESCRIPTION = (
 )
 
 DATASTORE_SECURITY = [{"ApiKeyAuth": []}]
+# Catalog search: optional auth — {} (no auth) OR a token via the catalog scheme.
+CATALOG_SECURITY = [{}, {"ApiKeyAuthCatalog": []}]
 
 
 def _ref(name: str) -> dict:
@@ -80,7 +82,7 @@ def _common_errors() -> dict:
 
 
 def build_spec() -> dict:
-    return {
+    spec = {
         "openapi": "3.1.0",
         "info": {
             "title": "HDX APIs",
@@ -115,10 +117,25 @@ def build_spec() -> dict:
                     "in": "header",
                     "name": "Authorization",
                     "description": "HDX API token. Required for all Tabular Data Endpoint requests, including public resources.",
-                }
+                },
+                "ApiKeyAuthCatalog": {
+                    "type": "apiKey",
+                    "in": "header",
+                    "name": "Authorization",
+                    "description": "HDX API token. Optional — public dataset search needs no authentication; a token is only required to include private or draft datasets.",
+                },
             },
         },
     }
+    # GitBook renders an in-page "Test it" panel by default. It can't work in the
+    # browser for this API (authenticated requests are CORS-blocked, and GitBook's
+    # proxy drops query params), so hide it on every operation. The rendered request
+    # format and curl examples still work; direct users to curl or a standalone client.
+    for path_item in spec["paths"].values():
+        for operation in path_item.values():
+            if isinstance(operation, dict) and "operationId" in operation:
+                operation["x-hideTryItPanel"] = True
+    return spec
 
 
 def _datastore_search_path() -> dict:
@@ -298,7 +315,7 @@ def _package_search_path() -> dict:
                 "Pass parameters as query string arguments (GET) or as a JSON body (POST)."
             ),
             "tags": ["Catalog"],
-            "security": [{}, {"ApiKeyAuth": []}],
+            "security": CATALOG_SECURITY,
             "parameters": _params_from_model(PackageSearchParams),
             "responses": {
                 "200": {
@@ -323,7 +340,7 @@ def _package_search_path() -> dict:
                 "which is useful for long `fq_list` or `facet.field` values."
             ),
             "tags": ["Catalog"],
-            "security": [{}, {"ApiKeyAuth": []}],
+            "security": CATALOG_SECURITY,
             "requestBody": {
                 "required": True,
                 "content": {
