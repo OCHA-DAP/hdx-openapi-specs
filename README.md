@@ -1,6 +1,6 @@
 # HDX APIs
 
-An OpenAPI 3.1 specification for the [CKAN DataStore API](https://docs.ckan.org/en/2.11/maintaining/datastore.html), generated from Pydantic v2 models.
+An OpenAPI 3.1 specification for the HDX APIs — the Tabular Data Endpoints (DataStore) and catalog search (`package_search`) — generated from Pydantic v2 models. Built on the [CKAN 2.11 DataStore API](https://docs.ckan.org/en/2.11/maintaining/datastore.html).
 
 Covers endpoints exposed by [HDX](https://data.humdata.org):
 

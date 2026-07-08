@@ -65,8 +65,15 @@ def _error_response(description: str) -> dict:
 
 def _common_errors() -> dict:
     return {
-        "403": _error_response("Forbidden — unauthenticated request, or the action is not permitted."),
+        "403": _error_response(
+            "Forbidden — API token is missing or invalid. Authentication is required "
+            "for all DataStore requests, including public resources."
+        ),
         "404": _error_response("Not Found — the resource_id does not exist in the DataStore."),
+        "409": _error_response(
+            "Conflict — Validation Error. The request parameters or SQL were invalid "
+            "(e.g. missing required parameter, non-SELECT SQL, malformed query, or wrong parameter type)."
+        ),
         "429": _error_response("Too Many Requests — rate limit exceeded."),
         "500": _error_response("Internal Server Error — unexpected server-side failure."),
     }
@@ -107,7 +114,7 @@ def build_spec() -> dict:
                     "type": "apiKey",
                     "in": "header",
                     "name": "Authorization",
-                    "description": "HDX API key. Required for all Tabular Data Endpoint requests, including public resources.",
+                    "description": "HDX API token. Required for all Tabular Data Endpoint requests, including public resources.",
                 }
             },
         },
@@ -291,7 +298,7 @@ def _package_search_path() -> dict:
                 "Pass parameters as query string arguments (GET) or as a JSON body (POST)."
             ),
             "tags": ["Catalog"],
-            "security": [],
+            "security": [{}, {"ApiKeyAuth": []}],
             "parameters": _params_from_model(PackageSearchParams),
             "responses": {
                 "200": {
@@ -303,6 +310,9 @@ def _package_search_path() -> dict:
                     },
                 },
                 **_common_errors(),
+                # package_search is catalog search, not DataStore — override the
+                # resource_id-specific 404 inherited from _common_errors().
+                "404": _error_response("Not Found — the requested action or endpoint does not exist."),
             },
         },
         "post": {
@@ -313,7 +323,7 @@ def _package_search_path() -> dict:
                 "which is useful for long `fq_list` or `facet.field` values."
             ),
             "tags": ["Catalog"],
-            "security": [],
+            "security": [{}, {"ApiKeyAuth": []}],
             "requestBody": {
                 "required": True,
                 "content": {
@@ -332,6 +342,7 @@ def _package_search_path() -> dict:
                     },
                 },
                 **_common_errors(),
+                "404": _error_response("Not Found — the requested action or endpoint does not exist."),
             },
         },
     }

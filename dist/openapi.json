@@ -310,7 +310,7 @@
             }
           },
           "403": {
-            "description": "Forbidden \u2014 unauthenticated request, or the action is not permitted.",
+            "description": "Forbidden \u2014 API token is missing or invalid. Authentication is required for all DataStore requests, including public resources.",
             "content": {
               "application/json": {
                 "schema": {
@@ -321,6 +321,16 @@
           },
           "404": {
             "description": "Not Found \u2014 the resource_id does not exist in the DataStore.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict \u2014 Validation Error. The request parameters or SQL were invalid (e.g. missing required parameter, non-SELECT SQL, malformed query, or wrong parameter type).",
             "content": {
               "application/json": {
                 "schema": {
@@ -385,7 +395,7 @@
             }
           },
           "403": {
-            "description": "Forbidden \u2014 unauthenticated request, or the action is not permitted.",
+            "description": "Forbidden \u2014 API token is missing or invalid. Authentication is required for all DataStore requests, including public resources.",
             "content": {
               "application/json": {
                 "schema": {
@@ -396,6 +406,16 @@
           },
           "404": {
             "description": "Not Found \u2014 the resource_id does not exist in the DataStore.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict \u2014 Validation Error. The request parameters or SQL were invalid (e.g. missing required parameter, non-SELECT SQL, malformed query, or wrong parameter type).",
             "content": {
               "application/json": {
                 "schema": {
@@ -464,7 +484,7 @@
             }
           },
           "403": {
-            "description": "Forbidden \u2014 unauthenticated request, or the action is not permitted.",
+            "description": "Forbidden \u2014 API token is missing or invalid. Authentication is required for all DataStore requests, including public resources.",
             "content": {
               "application/json": {
                 "schema": {
@@ -475,6 +495,16 @@
           },
           "404": {
             "description": "Not Found \u2014 the resource_id does not exist in the DataStore.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict \u2014 Validation Error. The request parameters or SQL were invalid (e.g. missing required parameter, non-SELECT SQL, malformed query, or wrong parameter type).",
             "content": {
               "application/json": {
                 "schema": {
@@ -539,7 +569,7 @@
             }
           },
           "403": {
-            "description": "Forbidden \u2014 unauthenticated request, or the action is not permitted.",
+            "description": "Forbidden \u2014 API token is missing or invalid. Authentication is required for all DataStore requests, including public resources.",
             "content": {
               "application/json": {
                 "schema": {
@@ -550,6 +580,16 @@
           },
           "404": {
             "description": "Not Found \u2014 the resource_id does not exist in the DataStore.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict \u2014 Validation Error. The request parameters or SQL were invalid (e.g. missing required parameter, non-SELECT SQL, malformed query, or wrong parameter type).",
             "content": {
               "application/json": {
                 "schema": {
@@ -618,7 +658,7 @@
             }
           },
           "403": {
-            "description": "Forbidden \u2014 unauthenticated request, or the action is not permitted.",
+            "description": "Forbidden \u2014 API token is missing or invalid. Authentication is required for all DataStore requests, including public resources.",
             "content": {
               "application/json": {
                 "schema": {
@@ -629,6 +669,16 @@
           },
           "404": {
             "description": "Not Found \u2014 the resource_id does not exist in the DataStore.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict \u2014 Validation Error. The request parameters or SQL were invalid (e.g. missing required parameter, non-SELECT SQL, malformed query, or wrong parameter type).",
             "content": {
               "application/json": {
                 "schema": {
@@ -693,7 +743,7 @@
             }
           },
           "403": {
-            "description": "Forbidden \u2014 unauthenticated request, or the action is not permitted.",
+            "description": "Forbidden \u2014 API token is missing or invalid. Authentication is required for all DataStore requests, including public resources.",
             "content": {
               "application/json": {
                 "schema": {
@@ -704,6 +754,16 @@
           },
           "404": {
             "description": "Not Found \u2014 the resource_id does not exist in the DataStore.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict \u2014 Validation Error. The request parameters or SQL were invalid (e.g. missing required parameter, non-SELECT SQL, malformed query, or wrong parameter type).",
             "content": {
               "application/json": {
                 "schema": {
@@ -743,7 +803,12 @@
         "tags": [
           "Catalog"
         ],
-        "security": [],
+        "security": [
+          {},
+          {
+            "ApiKeyAuth": []
+          }
+        ],
         "parameters": [
           {
             "name": "q",
@@ -1019,7 +1084,7 @@
             }
           },
           "403": {
-            "description": "Forbidden \u2014 unauthenticated request, or the action is not permitted.",
+            "description": "Forbidden \u2014 API token is missing or invalid. Authentication is required for all DataStore requests, including public resources.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1029,7 +1094,17 @@
             }
           },
           "404": {
-            "description": "Not Found \u2014 the resource_id does not exist in the DataStore.",
+            "description": "Not Found \u2014 the requested action or endpoint does not exist.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict \u2014 Validation Error. The request parameters or SQL were invalid (e.g. missing required parameter, non-SELECT SQL, malformed query, or wrong parameter type).",
             "content": {
               "application/json": {
                 "schema": {
@@ -1067,7 +1142,12 @@
         "tags": [
           "Catalog"
         ],
-        "security": [],
+        "security": [
+          {},
+          {
+            "ApiKeyAuth": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -1090,7 +1170,7 @@
             }
           },
           "403": {
-            "description": "Forbidden \u2014 unauthenticated request, or the action is not permitted.",
+            "description": "Forbidden \u2014 API token is missing or invalid. Authentication is required for all DataStore requests, including public resources.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1100,7 +1180,17 @@
             }
           },
           "404": {
-            "description": "Not Found \u2014 the resource_id does not exist in the DataStore.",
+            "description": "Not Found \u2014 the requested action or endpoint does not exist.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict \u2014 Validation Error. The request parameters or SQL were invalid (e.g. missing required parameter, non-SELECT SQL, malformed query, or wrong parameter type).",
             "content": {
               "application/json": {
                 "schema": {
@@ -2110,7 +2200,7 @@
           },
           "error": {
             "additionalProperties": true,
-            "description": "Error detail object containing a 'message' key and optional additional fields.",
+            "description": "Error detail object. Always contains a '__type' string. 403/404 errors include a 'message'; validation (409) errors instead carry structured 'query'/'info' fields.",
             "title": "Error",
             "type": "object"
           }
@@ -2127,7 +2217,7 @@
         "type": "apiKey",
         "in": "header",
         "name": "Authorization",
-        "description": "HDX API key. Required for all Tabular Data Endpoint requests, including public resources."
+        "description": "HDX API token. Required for all Tabular Data Endpoint requests, including public resources."
       }
     }
   }
