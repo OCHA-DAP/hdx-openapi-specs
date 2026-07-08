@@ -35,16 +35,21 @@ jobs:
         run: python -m openapi_spec_validator dist/openapi.json
 
       # Pushes the validated spec to GitBook. main only — PRs skip this.
-      # Requires the GITBOOK_TOKEN secret and GITBOOK_ORG_ID variable in repo settings.
+      # Requires the GITBOOK_TOKEN and GITBOOK_ORG_ID secrets in repo settings.
       - name: Publish OpenAPI spec to GitBook
         if: github.ref == 'refs/heads/main'
         env:
           GITBOOK_TOKEN: ${{ secrets.GITBOOK_TOKEN }}
-        run: >
-          npx -y @gitbook/cli@latest openapi publish
-          --spec hdx-tde
-          --organization ${{ vars.GITBOOK_ORG_ID }}
-          dist/openapi.json
+          GITBOOK_ORG_ID: ${{ secrets.GITBOOK_ORG_ID }}
+        run: |
+          if [ -z "$GITBOOK_ORG_ID" ]; then
+            echo "::error::GITBOOK_ORG_ID secret is empty — spec not published."
+            exit 1
+          fi
+          npx -y @gitbook/cli@latest openapi publish \
+            --spec hdx-tde \
+            --organization "$GITBOOK_ORG_ID" \
+            dist/openapi.json
 
       # Only commits if dist/openapi.json changed — no-op on clean runs
       - name: Commit updated spec
