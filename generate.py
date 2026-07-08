@@ -66,8 +66,8 @@ def _error_response(description: str) -> dict:
 def _common_errors() -> dict:
     return {
         "403": _error_response(
-            "Forbidden — authentication is required for all DataStore requests, "
-            "including public resources, or the API key is invalid."
+            "Forbidden — API token is missing or invalid. Authentication is required "
+            "for all DataStore requests, including public resources."
         ),
         "404": _error_response("Not Found — the resource_id does not exist in the DataStore."),
         "409": _error_response(
@@ -114,7 +114,7 @@ def build_spec() -> dict:
                     "type": "apiKey",
                     "in": "header",
                     "name": "Authorization",
-                    "description": "HDX API key. Required for all Tabular Data Endpoint requests, including public resources.",
+                    "description": "HDX API token. Required for all Tabular Data Endpoint requests, including public resources.",
                 }
             },
         },

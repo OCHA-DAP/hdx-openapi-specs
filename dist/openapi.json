@@ -310,7 +310,7 @@
             }
           },
           "403": {
-            "description": "Forbidden \u2014 authentication is required for all DataStore requests, including public resources, or the API key is invalid.",
+            "description": "Forbidden \u2014 API token is missing or invalid. Authentication is required for all DataStore requests, including public resources.",
             "content": {
               "application/json": {
                 "schema": {
@@ -395,7 +395,7 @@
             }
           },
           "403": {
-            "description": "Forbidden \u2014 authentication is required for all DataStore requests, including public resources, or the API key is invalid.",
+            "description": "Forbidden \u2014 API token is missing or invalid. Authentication is required for all DataStore requests, including public resources.",
             "content": {
               "application/json": {
                 "schema": {
@@ -484,7 +484,7 @@
             }
           },
           "403": {
-            "description": "Forbidden \u2014 authentication is required for all DataStore requests, including public resources, or the API key is invalid.",
+            "description": "Forbidden \u2014 API token is missing or invalid. Authentication is required for all DataStore requests, including public resources.",
             "content": {
               "application/json": {
                 "schema": {
@@ -569,7 +569,7 @@
             }
           },
           "403": {
-            "description": "Forbidden \u2014 authentication is required for all DataStore requests, including public resources, or the API key is invalid.",
+            "description": "Forbidden \u2014 API token is missing or invalid. Authentication is required for all DataStore requests, including public resources.",
             "content": {
               "application/json": {
                 "schema": {
@@ -658,7 +658,7 @@
             }
           },
           "403": {
-            "description": "Forbidden \u2014 authentication is required for all DataStore requests, including public resources, or the API key is invalid.",
+            "description": "Forbidden \u2014 API token is missing or invalid. Authentication is required for all DataStore requests, including public resources.",
             "content": {
               "application/json": {
                 "schema": {
@@ -743,7 +743,7 @@
             }
           },
           "403": {
-            "description": "Forbidden \u2014 authentication is required for all DataStore requests, including public resources, or the API key is invalid.",
+            "description": "Forbidden \u2014 API token is missing or invalid. Authentication is required for all DataStore requests, including public resources.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1084,7 +1084,7 @@
             }
           },
           "403": {
-            "description": "Forbidden \u2014 authentication is required for all DataStore requests, including public resources, or the API key is invalid.",
+            "description": "Forbidden \u2014 API token is missing or invalid. Authentication is required for all DataStore requests, including public resources.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1170,7 +1170,7 @@
             }
           },
           "403": {
-            "description": "Forbidden \u2014 authentication is required for all DataStore requests, including public resources, or the API key is invalid.",
+            "description": "Forbidden \u2014 API token is missing or invalid. Authentication is required for all DataStore requests, including public resources.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2217,7 +2217,7 @@
         "type": "apiKey",
         "in": "header",
         "name": "Authorization",
-        "description": "HDX API key. Required for all Tabular Data Endpoint requests, including public resources."
+        "description": "HDX API token. Required for all Tabular Data Endpoint requests, including public resources."
       }
     }
   }
