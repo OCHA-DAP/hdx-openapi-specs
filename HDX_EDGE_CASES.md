@@ -20,14 +20,14 @@ This document records known differences between HDX's deployment of the CKAN Dat
 }
 ```
 
-**How to authenticate:** Pass your HDX API key in the `Authorization` header:
+**How to authenticate:** Pass your HDX API token in the `Authorization` header:
 
 ```bash
-curl -H "Authorization: <your-api-key>" \
+curl -H "Authorization: <your-api-token>" \
   "https://data.humdata.org/api/action/datastore_search?resource_id=<id>&limit=5"
 ```
 
-Your API key is available at `data.humdata.org` → profile → API key.
+Your API token is available at `data.humdata.org` → profile → Manage API tokens.
 
 ---
 
