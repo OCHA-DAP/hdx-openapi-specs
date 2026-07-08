@@ -298,7 +298,7 @@ def _package_search_path() -> dict:
                 "Pass parameters as query string arguments (GET) or as a JSON body (POST)."
             ),
             "tags": ["Catalog"],
-            "security": [],
+            "security": [{}, {"ApiKeyAuth": []}],
             "parameters": _params_from_model(PackageSearchParams),
             "responses": {
                 "200": {
@@ -310,6 +310,9 @@ def _package_search_path() -> dict:
                     },
                 },
                 **_common_errors(),
+                # package_search is catalog search, not DataStore — override the
+                # resource_id-specific 404 inherited from _common_errors().
+                "404": _error_response("Not Found — the requested action or endpoint does not exist."),
             },
         },
         "post": {
@@ -320,7 +323,7 @@ def _package_search_path() -> dict:
                 "which is useful for long `fq_list` or `facet.field` values."
             ),
             "tags": ["Catalog"],
-            "security": [],
+            "security": [{}, {"ApiKeyAuth": []}],
             "requestBody": {
                 "required": True,
                 "content": {
@@ -339,6 +342,7 @@ def _package_search_path() -> dict:
                     },
                 },
                 **_common_errors(),
+                "404": _error_response("Not Found — the requested action or endpoint does not exist."),
             },
         },
     }

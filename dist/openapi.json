@@ -803,7 +803,12 @@
         "tags": [
           "Catalog"
         ],
-        "security": [],
+        "security": [
+          {},
+          {
+            "ApiKeyAuth": []
+          }
+        ],
         "parameters": [
           {
             "name": "q",
@@ -1089,7 +1094,7 @@
             }
           },
           "404": {
-            "description": "Not Found \u2014 the resource_id does not exist in the DataStore.",
+            "description": "Not Found \u2014 the requested action or endpoint does not exist.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1137,7 +1142,12 @@
         "tags": [
           "Catalog"
         ],
-        "security": [],
+        "security": [
+          {},
+          {
+            "ApiKeyAuth": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -1170,7 +1180,7 @@
             }
           },
           "404": {
-            "description": "Not Found \u2014 the resource_id does not exist in the DataStore.",
+            "description": "Not Found \u2014 the requested action or endpoint does not exist.",
             "content": {
               "application/json": {
                 "schema": {
