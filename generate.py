@@ -65,8 +65,15 @@ def _error_response(description: str) -> dict:
 
 def _common_errors() -> dict:
     return {
-        "403": _error_response("Forbidden — unauthenticated request, or the action is not permitted."),
+        "403": _error_response(
+            "Forbidden — authentication is required for all DataStore requests, "
+            "including public resources, or the API key is invalid."
+        ),
         "404": _error_response("Not Found — the resource_id does not exist in the DataStore."),
+        "409": _error_response(
+            "Conflict — Validation Error. The request parameters or SQL were invalid "
+            "(e.g. missing required parameter, non-SELECT SQL, malformed query, or wrong parameter type)."
+        ),
         "429": _error_response("Too Many Requests — rate limit exceeded."),
         "500": _error_response("Internal Server Error — unexpected server-side failure."),
     }
