@@ -1,4 +1,4 @@
-# CKAN DataStore OpenAPI Specification
+# HDX APIs
 
 An OpenAPI 3.1 specification for the [CKAN DataStore API](https://docs.ckan.org/en/2.11/maintaining/datastore.html), generated from Pydantic v2 models.
 

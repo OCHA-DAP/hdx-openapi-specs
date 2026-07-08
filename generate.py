@@ -22,24 +22,30 @@ BASE_URL = "https://data.humdata.org/api/3/action"
 
 CKAN_ACTION_NOTE = (
     "CKAN actions accept parameters as either query string parameters (GET) "
-    "or a JSON body (POST). Both methods are equivalent. "
-    "All requests to HDX must include the `Authorization` header."
+    "or a JSON body (POST). Both methods are equivalent."
 )
 
-TDE_DESCRIPTION = (
+DESCRIPTION = (
+    "OpenAPI specification for HDX APIs as exposed by the "
+    "Humanitarian Data Exchange (HDX).\n\n"
     "## Tabular Data Endpoints\n\n"
     "The HDX **Tabular Data Endpoints (TDE)** provide programmatic access to tabular datasets "
     "hosted on HDX. Powered by the CKAN DataStore extension, they support real-time querying, "
-    "customizable filters, and dataset joins.\n\n"
+    "customizable filters, and dataset joins. **Authentication required for all TDE requests on HDX.**\n\n"
     "- **`datastore_search`** — simple filters, browsing data, or building lightweight applications\n"
     "- **`datastore_search_sql`** — analytical purposes or when multiple conditions and calculations are required\n"
     "- **`datastore_info`** — schema information about a resource, including column names and data types\n\n"
-    "Also covered: **`package_search`** for searching datasets in the HDX catalog."
+    "## Metadata endpoints\n\n"
+    "Catalog search for discovering datasets on HDX. No authentication required for public data.\n\n"
+    "- **`package_search`** — search datasets by keyword, filter, or facet\n\n"
+    f"{CKAN_ACTION_NOTE}\n\n"
+    "> **Note:** This specification documents behavior as described in the "
+    "[CKAN 2.11 documentation](https://docs.ckan.org/en/2.11/maintaining/datastore.html). "
+    "Some parameter interactions (e.g. `filters` vs `q` in `datastore_search`) "
+    "have nuanced behavior that is not fully captured here."
 )
 
-
-def _schema(model) -> dict:
-    return model.model_json_schema()
+DATASTORE_SECURITY = [{"ApiKeyAuth": []}]
 
 
 def _ref(name: str) -> dict:
@@ -70,18 +76,9 @@ def build_spec() -> dict:
     return {
         "openapi": "3.1.0",
         "info": {
-            "title": "HDX CKAN DataStore API",
+            "title": "HDX APIs",
             "version": "2.11.4",
-            "description": (
-                "OpenAPI specification for the CKAN DataStore API as exposed by the "
-                "Humanitarian Data Exchange (HDX).\n\n"
-                f"{TDE_DESCRIPTION}\n\n"
-                f"{CKAN_ACTION_NOTE}\n\n"
-                "> **Note:** This specification documents behavior as described in the "
-                "[CKAN 2.11 documentation](https://docs.ckan.org/en/2.11/maintaining/datastore.html). "
-                "Some parameter interactions (e.g. `filters` vs `q` in `datastore_search`) "
-                "have nuanced behavior that is not fully captured here."
-            ),
+            "description": DESCRIPTION,
             "contact": {
                 "name": "HDX Team",
                 "url": "https://data.humdata.org",
@@ -110,11 +107,10 @@ def build_spec() -> dict:
                     "type": "apiKey",
                     "in": "header",
                     "name": "Authorization",
-                    "description": "CKAN API key. Required for all requests on HDX, including public resources.",
+                    "description": "HDX API key. Required for all Tabular Data Endpoint requests, including public resources.",
                 }
             },
         },
-        "security": [{"ApiKeyAuth": []}],
     }
 
 
@@ -129,6 +125,7 @@ def _datastore_search_path() -> dict:
                 "Pass parameters as query string arguments (GET) or as a JSON body (POST)."
             ),
             "tags": ["DataStore"],
+            "security": DATASTORE_SECURITY,
             "parameters": _params_from_model(DatastoreSearchParams),
             "responses": {
                 "200": {
@@ -150,6 +147,7 @@ def _datastore_search_path() -> dict:
                 "which is useful for large `filters` or `fields` payloads."
             ),
             "tags": ["DataStore"],
+            "security": DATASTORE_SECURITY,
             "requestBody": {
                 "required": True,
                 "content": {
@@ -185,6 +183,7 @@ def _datastore_search_sql_path() -> dict:
                 "Only `SELECT` statements are permitted."
             ),
             "tags": ["DataStore"],
+            "security": DATASTORE_SECURITY,
             "parameters": _params_from_model(DatastoreSearchSqlParams),
             "responses": {
                 "200": {
@@ -203,6 +202,7 @@ def _datastore_search_sql_path() -> dict:
             "summary": "Query a DataStore resource with SQL (POST)",
             "description": "Identical to the GET form. Use POST for long SQL statements.",
             "tags": ["DataStore"],
+            "security": DATASTORE_SECURITY,
             "requestBody": {
                 "required": True,
                 "content": {
@@ -236,6 +236,7 @@ def _datastore_info_path() -> dict:
                 "for a DataStore resource."
             ),
             "tags": ["DataStore"],
+            "security": DATASTORE_SECURITY,
             "parameters": _params_from_model(DatastoreInfoParams),
             "responses": {
                 "200": {
@@ -254,6 +255,7 @@ def _datastore_info_path() -> dict:
             "summary": "Get DataStore resource metadata (POST)",
             "description": "Identical to the GET form.",
             "tags": ["DataStore"],
+            "security": DATASTORE_SECURITY,
             "requestBody": {
                 "required": True,
                 "content": {
@@ -284,10 +286,12 @@ def _package_search_path() -> dict:
             "summary": "Search datasets",
             "description": (
                 "Search for datasets (packages) using Solr query syntax. "
-                "Supports filtering, faceting, sorting, and pagination.\n\n"
+                "Supports filtering, faceting, sorting, and pagination. "
+                "No authentication required for public data.\n\n"
                 "Pass parameters as query string arguments (GET) or as a JSON body (POST)."
             ),
             "tags": ["Catalog"],
+            "security": [],
             "parameters": _params_from_model(PackageSearchParams),
             "responses": {
                 "200": {
@@ -309,6 +313,7 @@ def _package_search_path() -> dict:
                 "which is useful for long `fq_list` or `facet.field` values."
             ),
             "tags": ["Catalog"],
+            "security": [],
             "requestBody": {
                 "required": True,
                 "content": {

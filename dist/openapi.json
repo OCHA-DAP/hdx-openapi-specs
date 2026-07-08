@@ -1,9 +1,9 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "HDX CKAN DataStore API",
+    "title": "HDX APIs",
     "version": "2.11.4",
-    "description": "OpenAPI specification for the CKAN DataStore API as exposed by the Humanitarian Data Exchange (HDX).\n\n## Tabular Data Endpoints\n\nThe HDX **Tabular Data Endpoints (TDE)** provide programmatic access to tabular datasets hosted on HDX. Powered by the CKAN DataStore extension, they support real-time querying, customizable filters, and dataset joins.\n\n- **`datastore_search`** \u2014 simple filters, browsing data, or building lightweight applications\n- **`datastore_search_sql`** \u2014 analytical purposes or when multiple conditions and calculations are required\n- **`datastore_info`** \u2014 schema information about a resource, including column names and data types\n\nAlso covered: **`package_search`** for searching datasets in the HDX catalog.\n\nCKAN actions accept parameters as either query string parameters (GET) or a JSON body (POST). Both methods are equivalent. All requests to HDX must include the `Authorization` header.\n\n> **Note:** This specification documents behavior as described in the [CKAN 2.11 documentation](https://docs.ckan.org/en/2.11/maintaining/datastore.html). Some parameter interactions (e.g. `filters` vs `q` in `datastore_search`) have nuanced behavior that is not fully captured here.",
+    "description": "OpenAPI specification for HDX APIs as exposed by the Humanitarian Data Exchange (HDX).\n\n## Tabular Data Endpoints\n\nThe HDX **Tabular Data Endpoints (TDE)** provide programmatic access to tabular datasets hosted on HDX. Powered by the CKAN DataStore extension, they support real-time querying, customizable filters, and dataset joins. **Authentication required for all TDE requests on HDX.**\n\n- **`datastore_search`** \u2014 simple filters, browsing data, or building lightweight applications\n- **`datastore_search_sql`** \u2014 analytical purposes or when multiple conditions and calculations are required\n- **`datastore_info`** \u2014 schema information about a resource, including column names and data types\n\n## Metadata endpoints\n\nCatalog search for discovering datasets on HDX. No authentication required for public data.\n\n- **`package_search`** \u2014 search datasets by keyword, filter, or facet\n\nCKAN actions accept parameters as either query string parameters (GET) or a JSON body (POST). Both methods are equivalent.\n\n> **Note:** This specification documents behavior as described in the [CKAN 2.11 documentation](https://docs.ckan.org/en/2.11/maintaining/datastore.html). Some parameter interactions (e.g. `filters` vs `q` in `datastore_search`) have nuanced behavior that is not fully captured here.",
     "contact": {
       "name": "HDX Team",
       "url": "https://data.humdata.org"
@@ -27,6 +27,11 @@
         "description": "Query rows from a DataStore resource with optional filtering, full-text search, sorting, and pagination.\n\nPass parameters as query string arguments (GET) or as a JSON body (POST).",
         "tags": [
           "DataStore"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
         ],
         "parameters": [
           {
@@ -353,6 +358,11 @@
         "tags": [
           "DataStore"
         ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -424,6 +434,11 @@
         "description": "Execute a SQL `SELECT` statement against one or more DataStore resources. Useful for aggregations, joins, and complex filtering that `datastore_search` cannot express.\n\nOnly `SELECT` statements are permitted.",
         "tags": [
           "DataStore"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
         ],
         "parameters": [
           {
@@ -497,6 +512,11 @@
         "tags": [
           "DataStore"
         ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -568,6 +588,11 @@
         "description": "Retrieve field definitions, type information, and size/count metadata for a DataStore resource.",
         "tags": [
           "DataStore"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
         ],
         "parameters": [
           {
@@ -641,6 +666,11 @@
         "tags": [
           "DataStore"
         ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -709,10 +739,11 @@
       "get": {
         "operationId": "package_search_get",
         "summary": "Search datasets",
-        "description": "Search for datasets (packages) using Solr query syntax. Supports filtering, faceting, sorting, and pagination.\n\nPass parameters as query string arguments (GET) or as a JSON body (POST).",
+        "description": "Search for datasets (packages) using Solr query syntax. Supports filtering, faceting, sorting, and pagination. No authentication required for public data.\n\nPass parameters as query string arguments (GET) or as a JSON body (POST).",
         "tags": [
           "Catalog"
         ],
+        "security": [],
         "parameters": [
           {
             "name": "q",
@@ -1036,6 +1067,7 @@
         "tags": [
           "Catalog"
         ],
+        "security": [],
         "requestBody": {
           "required": true,
           "content": {
@@ -1960,11 +1992,80 @@
             "title": "Results",
             "type": "array"
           },
+          "sort": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Sort string echoed from the request.",
+            "title": "Sort"
+          },
+          "facets": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Legacy facet counts. Prefer `search_facets`.",
+            "title": "Facets"
+          },
           "search_facets": {
             "additionalProperties": true,
-            "description": "Facet counts keyed by field name. Each value contains an `items` list of `{name, display_name, count}` objects.",
+            "description": "Facet counts keyed by field name. Each entry has a `title` and an `items` list of `{name, display_name, count}` objects.",
             "title": "Search Facets",
             "type": "object"
+          },
+          "facet_pivot": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Pivot facet results, if requested.",
+            "title": "Facet Pivot"
+          },
+          "facet_queries": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Facet query results, if requested.",
+            "title": "Facet Queries"
+          },
+          "expanded": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Expanded results, if requested.",
+            "title": "Expanded"
           }
         },
         "required": [
@@ -2026,13 +2127,8 @@
         "type": "apiKey",
         "in": "header",
         "name": "Authorization",
-        "description": "CKAN API key. Required for all requests on HDX, including public resources."
+        "description": "HDX API key. Required for all Tabular Data Endpoint requests, including public resources."
       }
     }
-  },
-  "security": [
-    {
-      "ApiKeyAuth": []
-    }
-  ]
+  }
 }

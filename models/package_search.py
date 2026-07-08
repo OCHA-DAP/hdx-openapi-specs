@@ -72,10 +72,18 @@ class PackageSearchParams(BaseModel):
 class PackageSearchResult(BaseModel):
     count: int = Field(..., description="Total number of datasets matching the query.")
     results: list[dict[str, Any]] = Field(..., description="List of matching dataset objects.")
+    sort: str | None = Field(None, description="Sort string echoed from the request.")
+    facets: dict[str, Any] | None = Field(None, description="Legacy facet counts. Prefer `search_facets`.")
     search_facets: dict[str, Any] = Field(
         ...,
-        description="Facet counts keyed by field name. Each value contains an `items` list of `{name, display_name, count}` objects.",
+        description=(
+            "Facet counts keyed by field name. Each entry has a `title` and an `items` list "
+            "of `{name, display_name, count}` objects."
+        ),
     )
+    facet_pivot: dict[str, Any] | None = Field(None, description="Pivot facet results, if requested.")
+    facet_queries: dict[str, Any] | None = Field(None, description="Facet query results, if requested.")
+    expanded: dict[str, Any] | None = Field(None, description="Expanded results, if requested.")
 
 
 class PackageSearchResponse(BaseModel):
