@@ -25,8 +25,12 @@ Status: `[x]` implemented, `[ ]` planned / not yet implemented.
 - [x] **CI_PUBLISHING-004** — On `main` only, a regenerated `dist/openapi.json` is committed back automatically (`chore: regenerate openapi.json`) only when it changed.
 - [x] **CI_PUBLISHING-005** — On `main` only, `dist/` is deployed to GitHub Pages. Pull-request runs never publish to GitBook or deploy.
 - [x] **CI_PUBLISHING-006** — Publishing (GitBook publish, auto-commit, Pages artifact upload) runs in a separate `publish` job on `main` only. It starts only after `generate` succeeds and publishes exactly the file `generate` validated, without regenerating it.
+- [x] **CI_PUBLISHING-007** — The GitHub Pages site renders `openapi.json` with Redoc through `dist/index.html`, loading Redoc's `latest` standalone bundle as an ES module (`<script type="module">`). Fixes a blank Pages site: the `latest` bundle updated on 2026-10-14 uses `import.meta`, so loading it as a classic script failed with `Cannot use 'import.meta' outside a module` and Redoc never rendered.
 
 ## Notes / open questions
 
 - **README is incomplete.** The README's CI section omits the GitBook publish
   step and doesn't mention that PRs to `main` run generate + validate only.
+- **Unpinned Redoc (CI_PUBLISHING-007).** Loading `latest` means a new Redoc
+  release can break the Pages site with no change in this repo, and CI won't
+  notice — it validates `openapi.json` but never renders the page.
