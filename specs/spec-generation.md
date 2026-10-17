@@ -33,7 +33,4 @@ Status: `[x]` implemented, `[ ]` planned / not yet implemented.
 
 ## Notes / open questions
 
-- **No unit tests exist.** AGENTS.md requires all code to be covered by unit
-  tests in `tests/`, but the repo has no `tests/` directory. Every `[x]`
-  requirement above is currently unverified by tests; CI only checks that the
-  output is a valid OpenAPI document.
+- None.

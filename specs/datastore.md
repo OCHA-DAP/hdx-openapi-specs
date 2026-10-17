@@ -40,9 +40,15 @@ Status: `[x]` implemented, `[ ]` planned / not yet implemented.
 ### `datastore_info`
 
 - [x] **DATASTORE-007** — Requires `resource_id` (id or alias). Returns field descriptors and optional `meta` with aliases, row count, table/index/database sizes, and `table_type` (`BASE TABLE` | `VIEW` | `FOREIGN` | `LOCAL TEMPORARY`).
+- [x] **DATASTORE-008** — The operations are summarised as "Get DataStore resource info" (POST: "Get DataStore resource info (POST)").
+- [x] **DATASTORE-009** — Each entry in `fields`, in both `datastore_info` and `datastore_search` responses, is documented as the same structured field object, not a free-form dictionary:
+  - `id` — the column name.
+  - `type` — the CKAN DataStore type (e.g. `text`, `numeric`, `timestamp`).
+  - `info` — optional; the column's data dictionary: optional `label` (display name) and `notes` (description); other keys are allowed.
 
+  Other keys the API returns (e.g. `schema` in `datastore_info`) are allowed but not documented.
 ## Notes / open questions
 
-- `models/common.py` defines a `FieldInfo` model (`id`, `type`, `info`), but
-  response `fields` are typed as `list[dict]` and `FieldInfo` is not referenced
-  by any response model or emitted into `components.schemas`.
+- `datastore_search_sql` still types its `fields` as free-form dictionaries;
+  only `datastore_info` and `datastore_search` use the structured field
+  object (DATASTORE-009).

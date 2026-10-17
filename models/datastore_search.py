@@ -1,6 +1,8 @@
 from typing import Any, Literal
 from pydantic import BaseModel, ConfigDict, Field
 
+from models.common import FieldInfo
+
 
 class DatastoreSearchParams(BaseModel):
     resource_id: str = Field(
@@ -109,9 +111,9 @@ class DatastoreSearchResult(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
 
     resource_id: str = Field(..., description="The resource ID that was queried.")
-    fields: list[dict[str, Any]] = Field(
+    fields: list[FieldInfo] = Field(
         ...,
-        description="List of field descriptor objects, each with `id` and `type` keys.",
+        description="One descriptor per returned column: its name, CKAN type, and data dictionary entry (`info`).",
     )
     offset: int | None = Field(None, description="The offset used in the query.")
     limit: int = Field(..., description="The limit used in the query.")
