@@ -1,5 +1,7 @@
-from typing import Any, Literal
+from typing import Literal
 from pydantic import BaseModel, Field
+
+from models.common import FieldInfo
 
 
 class DatastoreInfoParams(BaseModel):
@@ -33,10 +35,7 @@ class DatastoreInfoResult(BaseModel):
         None,
         description="Resource metadata including aliases, row count, and size information.",
     )
-    fields: list[dict[str, Any]] = Field(
+    fields: list[FieldInfo] = Field(
         ...,
-        description=(
-            "List of field descriptor objects. Each contains `id`, `type`, and optionally "
-            "`schema` with index and uniqueness information."
-        ),
+        description="One descriptor per column: its name, CKAN type, and data dictionary entry (`info`).",
     )

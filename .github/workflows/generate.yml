@@ -12,11 +12,10 @@ permissions:
   contents: read
 
 jobs:
+  # Runs on every trigger, including PRs — the only job that does.
   generate:
     name: Generate openapi.json
     runs-on: ubuntu-latest
-    permissions:
-      contents: write  # needed to auto-commit the regenerated spec
     steps:
       - uses: actions/checkout@v4
 
@@ -34,10 +33,37 @@ jobs:
       - name: Validate OpenAPI spec
         run: python -m openapi_spec_validator dist/openapi.json
 
-      # Pushes the validated spec to GitBook. main only — PRs skip this.
+      # Hands the validated spec to the publish job so it publishes exactly
+      # this file rather than regenerating it. main only — PRs skip this.
+      - name: Upload validated spec
+        if: github.ref == 'refs/heads/main'
+        uses: actions/upload-artifact@v4
+        with:
+          name: openapi-spec
+          path: dist/openapi.json
+
+  # Only runs on main, and only after generate succeeds — PRs never publish
+  publish:
+    name: Publish spec
+    needs: generate
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write  # needed to auto-commit the regenerated spec
+    steps:
+      - uses: actions/checkout@v4
+
+      # Overwrites the checked-out dist/openapi.json with the validated one;
+      # dist/index.html comes from the checkout.
+      - name: Download validated spec
+        uses: actions/download-artifact@v4
+        with:
+          name: openapi-spec
+          path: dist/
+
+      # Pushes the validated spec to GitBook.
       # Requires the GITBOOK_TOKEN and GITBOOK_ORG_ID secrets in repo settings.
       - name: Publish OpenAPI spec to GitBook
-        if: github.ref == 'refs/heads/main'
         env:
           GITBOOK_TOKEN: ${{ secrets.GITBOOK_TOKEN }}
           GITBOOK_ORG_ID: ${{ secrets.GITBOOK_ORG_ID }}
@@ -64,10 +90,10 @@ jobs:
         with:
           path: dist/
 
-  # Only runs on pushes to main — PRs generate and validate but do not deploy
+  # Only runs on main — PRs generate and validate but do not deploy
   deploy:
     name: Deploy to GitHub Pages
-    needs: generate
+    needs: publish
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:

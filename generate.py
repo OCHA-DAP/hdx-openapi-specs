@@ -254,7 +254,7 @@ def _datastore_info_path() -> dict:
     return {
         "get": {
             "operationId": "datastore_info_get",
-            "summary": "Get DataStore resource metadata",
+            "summary": "Get DataStore resource info",
             "description": (
                 "Retrieve field definitions, type information, and size/count metadata "
                 "for a DataStore resource."
@@ -276,7 +276,7 @@ def _datastore_info_path() -> dict:
         },
         "post": {
             "operationId": "datastore_info_post",
-            "summary": "Get DataStore resource metadata (POST)",
+            "summary": "Get DataStore resource info (POST)",
             "description": "Identical to the GET form.",
             "tags": ["DataStore"],
             "security": DATASTORE_SECURITY,

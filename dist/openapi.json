@@ -628,7 +628,7 @@
     "/datastore_info": {
       "get": {
         "operationId": "datastore_info_get",
-        "summary": "Get DataStore resource metadata",
+        "summary": "Get DataStore resource info",
         "description": "Retrieve field definitions, type information, and size/count metadata for a DataStore resource.",
         "tags": [
           "DataStore"
@@ -716,7 +716,7 @@
       },
       "post": {
         "operationId": "datastore_info_post",
-        "summary": "Get DataStore resource metadata (POST)",
+        "summary": "Get DataStore resource info (POST)",
         "description": "Identical to the GET form.",
         "tags": [
           "DataStore"
@@ -1463,10 +1463,9 @@
             "type": "string"
           },
           "fields": {
-            "description": "List of field descriptor objects, each with `id` and `type` keys.",
+            "description": "One descriptor per returned column: its name, CKAN type, and data dictionary entry (`info`).",
             "items": {
-              "additionalProperties": true,
-              "type": "object"
+              "$ref": "#/components/schemas/FieldInfo"
             },
             "title": "Fields",
             "type": "array"
@@ -1604,6 +1603,72 @@
           "_links"
         ],
         "title": "DatastoreSearchResult",
+        "type": "object"
+      },
+      "FieldDictionaryInfo": {
+        "additionalProperties": true,
+        "properties": {
+          "label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Human-readable display name for the column.",
+            "title": "Label"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Description of the column's contents.",
+            "title": "Notes"
+          }
+        },
+        "title": "FieldDictionaryInfo",
+        "type": "object"
+      },
+      "FieldInfo": {
+        "additionalProperties": true,
+        "properties": {
+          "id": {
+            "description": "The field name (column identifier).",
+            "title": "Id",
+            "type": "string"
+          },
+          "type": {
+            "description": "The CKAN DataStore type of the field (e.g. 'text', 'numeric', 'timestamp').",
+            "title": "Type",
+            "type": "string"
+          },
+          "info": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/FieldDictionaryInfo"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "The column's data dictionary entry. Other keys besides `label` and `notes` may be present."
+          }
+        },
+        "required": [
+          "id",
+          "type"
+        ],
+        "title": "FieldInfo",
         "type": "object"
       },
       "DatastoreSearchResponse": {
@@ -1744,10 +1809,9 @@
             "description": "Resource metadata including aliases, row count, and size information."
           },
           "fields": {
-            "description": "List of field descriptor objects. Each contains `id`, `type`, and optionally `schema` with index and uniqueness information.",
+            "description": "One descriptor per column: its name, CKAN type, and data dictionary entry (`info`).",
             "items": {
-              "additionalProperties": true,
-              "type": "object"
+              "$ref": "#/components/schemas/FieldInfo"
             },
             "title": "Fields",
             "type": "array"
