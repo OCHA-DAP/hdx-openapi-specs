@@ -11,6 +11,9 @@ class FieldDictionaryInfo(BaseModel):
 
 
 class FieldInfo(BaseModel):
+    # Undocumented keys such as `schema` (datastore_info) must survive validation (DATASTORE-009).
+    model_config = ConfigDict(extra="allow")
+
     id: str = Field(..., description="The field name (column identifier).")
     type: str = Field(..., description="The CKAN DataStore type of the field (e.g. 'text', 'numeric', 'timestamp').")
     info: FieldDictionaryInfo | None = Field(

@@ -1639,6 +1639,7 @@
         "type": "object"
       },
       "FieldInfo": {
+        "additionalProperties": true,
         "properties": {
           "id": {
             "description": "The field name (column identifier).",
